@@ -1,28 +1,28 @@
 """
-🏍️ PANEL REPUESTOS DE MOTO
+🚗 PANEL REPUESTOS DE CARRO
 Sistema H&I
-Catálogo Técnico
+Sistema Avanzado
 """
 
 def iniciar():
     print("==================================")
-    print("    REPUESTOS DE MOTOCICLETA     ")
+    print("      REPUESTOS DE AUTOS         ")
     print("==================================")
-    print("🔧 BÚSQUEDA:")
-    print("1. Por Marca / Modelo / Año")
-    print("2. Por Código OEM / Referencia")
+    print("🚗 VEHÍCULO:")
+    print("1. Seleccionar Marca / Modelo")
+    print("2. Por Motor / Chasis")
     print("")
-    print("📦 PRODUCTOS:")
-    print("3. Agregar Pieza")
-    print("4. Control de Stock")
+    print("📋 CATÁLOGO:")
+    print("3. Originales vs Alternativos")
+    print("4. Lista de Piezas")
     print("")
     print("🚪 0. Salir")
     
     opcion = input("\nSelecciona una opción: ")
     
     if opcion == "1":
-        print("🏍️ Filtrando por vehículo...")
+        print("🚙 Selección de vehículo...")
     elif opcion == "2":
-        print("🔍 Buscando referencia técnica...")
+        print("🔧 Especificaciones de motor...")
     else:
         print("👋 Volviendo al menú...")
