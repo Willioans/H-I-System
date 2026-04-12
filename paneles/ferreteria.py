@@ -1,30 +1,51 @@
 """
 🔩 PANEL DE FERRETERÍA
 Sistema H&I
-Materiales, Herramientas y Construcción
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from base_datos import conectar
+from config import formato_precio
+
+def agregar_material():
+    print("\n🔨 NUEVO MATERIAL")
+    cod = input("Código: ")
+    nom = input("Nombre: ")
+    uni = input("Unidad (Mts, Kg, Pza): ")
+    prec = float(input("Precio: "))
+    stk = int(input("Stock: "))
+
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO ferreteria (codigo, nombre, unidad, precio, stock) VALUES (?,?,?,?,?)",
+                   (cod, nom, uni, prec, stk))
+    conn.commit()
+    print(f"✅ Agregado! {formato_precio(prec)}")
+    conn.close()
+
+def ver_listado():
+    print("\n📋 LISTA DE MATERIALES")
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, unidad, precio, stock FROM ferreteria")
+    for p in cursor.fetchall():
+        print(f"{p[0]} | {p[1]} | Precio: {formato_precio(p[2])} | Stock: {p[3]}")
+    conn.close()
+
 def iniciar():
-    print("==================================")
-    print("     SISTEMA DE FERRETERÍA       ")
-    print("==================================")
-    print("🔨 PRODUCTOS:")
-    print("1. Agregar Material")
-    print("2. Control de Unidades (Kg, Mt, Lt)")
-    print("3. Cotización Rápida")
-    print("")
-    print("📊 REPORTES:")
-    print("4. Inventario Total")
-    print("")
-    print("🚪 0. Salir")
-    
-    opcion = input("\nSelecciona una opción: ")
-    
-    if opcion == "1":
-        print("📝 Nuevo material...")
-    elif opcion == "2":
-        print("⚖️ Gestión de medidas...")
-    elif opcion == "3":
-        print("🧾 Generando cotización...")
-    else:
-        print("👋 Volviendo al menú...")
+    while True:
+        print("\n==================================")
+        print("     SISTEMA DE FERRETERÍA       ")
+        print("==================================")
+        print("1. ➕ Agregar Material")
+        print("2. 📋 Ver Inventario")
+        print("3. 🧾 Cotización")
+        print("4. 🚪 Salir")
+        
+        op = input("Opción: ")
+        if op == "1": agregar_material()
+        elif op == "2": ver_listado()
+        elif op == "4": break
+        input("\nEnter...")
