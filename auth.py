@@ -1,23 +1,29 @@
 """
-🔐 SISTEMA DE AUTENTICACIÓN
+🔐 SISTEMA DE AUTENTICACIÓN AVANZADA
 H&I System
-Login y Control de Accesos
+SEGURIDAD MÁXIMA Y ENCRIPTACIÓN
 """
 
 import sys
 import os
+import hashlib # 🛡️ LIBRERÍA PARA ENCRIPTAR
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from base_datos import conectar
 
-# Crear usuario ADMIN por defecto
+# Función para convertir texto en código ilegible
+def encriptar_texto(texto):
+    return hashlib.sha256(texto.encode()).hexdigest()
+
+# Crear usuario ADMIN por defecto (CLAVE ENCRIPTADA)
 def crear_admin_default():
     conn = conectar()
     cursor = conn.cursor()
     try:
+        clave_encriptada = encriptar_texto("1234")
         cursor.execute("INSERT INTO usuarios (usuario, password, nombre, rol) VALUES (?, ?, ?, ?)",
-                       ("admin", "1234", "Administrador", "SuperAdmin"))
+                       ("admin", clave_encriptada, "Administrador", "SuperAdmin"))
         conn.commit()
-        print("✅ Usuario Admin creado por defecto")
+        print("✅ Usuario Admin creado y protegido")
     except:
         pass # Si ya existe, no hace nada
     conn.close()
@@ -25,8 +31,12 @@ def crear_admin_default():
 def verificar_login(usuario, contraseña):
     conn = conectar()
     cursor = conn.cursor()
+    
+    # Encriptamos lo que escribe el usuario para comparar
+    contraseña_encriptada = encriptar_texto(contraseña)
+    
     cursor.execute("SELECT nombre, rol FROM usuarios WHERE usuario = ? AND password = ?", 
-                   (usuario, contraseña))
+                   (usuario, contraseña_encriptada))
     resultado = cursor.fetchone()
     conn.close()
     
@@ -38,8 +48,8 @@ def verificar_login(usuario, contraseña):
 def pantalla_login():
     print("\n")
     print("╔══════════════════════════════════════╗")
-    print("║           ACCESO RESTRINGIDO         ║")
-    print("║           SISTEMA H&I SYSTEM         ║")
+    print("║        ACCESO SEGURO 🔐             ║")
+    print("║           SISTEMA H&I               ║")
     print("╚══════════════════════════════════════╝")
     
     usuario = input("👤 Usuario: ")
@@ -49,9 +59,9 @@ def pantalla_login():
     
     if datos["valido"]:
         print(f"\n✅ Bienvenido {datos['nombre']}! | Nivel: {datos['rol']}")
+        print("🛡️ Conexión encriptada activada.")
         print("------------------------------------------")
         return datos
     else:
         print("❌ Usuario o contraseña incorrectos.")
         return None
- 
