@@ -1,34 +1,55 @@
 """
 👕 PANEL DE TIENDA
 Sistema H&I
-Especial para Ropa, Calzado y Accesorios
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from base_datos import conectar
+from config import formato_precio
+
+def ingresar_producto():
+    print("\n📝 NUEVO ARTÍCULO")
+    codigo = input("Código: ")
+    nombre = input("Nombre: ")
+    talla = input("Talla: ")
+    color = input("Color: ")
+    precio = float(input("Precio: "))
+    stock = int(input("Stock: "))
+
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO productos_tienda (codigo, nombre, talla, color, precio, stock)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (codigo, nombre, talla, color, precio, stock))
+        conn.commit()
+        print(f"✅ Guardado! Precio: {formato_precio(precio)}")
+    except Exception as e: print(f"❌ {e}")
+    conn.close()
+
+def ver_productos():
+    print("\n📋 CATÁLOGO")
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, talla, color, precio, stock FROM productos_tienda")
+    for p in cursor.fetchall():
+        print(f"{p[0]} | Talla:{p[1]} | Color:{p[2]} | Precio:{formato_precio(p[3])}")
+    conn.close()
+
 def iniciar():
-    print("==================================")
-    print("       SISTEMA DE TIENDA         ")
-    print("==================================")
-    print("📦 PRODUCTOS:")
-    print("1. Registrar Nuevo Artículo")
-    print("2. Ver Catálogo")
-    print("3. Buscar por Talla / Color")
-    print("4. Actualizar Precio")
-    print("")
-    print("📊 REPORTES:")
-    print("5. Productos más vendidos")
-    print("")
-    print("🚪 0. Salir")
-    
-    opcion = input("\nSelecciona una opción: ")
-    
-    if opcion == "1":
-        print("📝 Abriendo formulario...")
-        print("(Campos: Código, Nombre, Talla, Color, Precio, Stock)")
-    elif opcion == "2":
-        print("📋 Mostrando lista completa...")
-    elif opcion == "3":
-        print("🔍 Filtro por Talla y Color...")
-    elif opcion == "4":
-        print("💲 Modificador de precios...")
-    else:
-        print("👋 Volviendo al menú principal...")
+    while True:
+        print("\n==================================")
+        print("       SISTEMA DE TIENDA         ")
+        print("==================================")
+        print("1. ➕ Agregar")
+        print("2. 📋 Ver Catálogo")
+        print("3. 🚪 Salir")
+        
+        op = input("Opción: ")
+        if op == "1": ingresar_producto()
+        elif op == "2": ver_productos()
+        elif op == "3": break
+        input("\nEnter...")
