@@ -18,10 +18,15 @@ def agregar_pieza():
 
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO repuestos_carro (codigo, nombre, motor, precio) VALUES (?,?,?,?)",
-                   (cod, nom, motor, prec))
-    conn.commit()
-    print(f"✅ Guardado! {formato_precio(prec)}")
+    try:
+        cursor.execute('''
+            INSERT INTO repuestos_carro (codigo, nombre, motor, precio)
+            VALUES (?,?,?,?)
+        ''', (cod, nom, motor, prec))
+        conn.commit()
+        print(f"✅ Guardado! Precio: {formato_precio(prec)}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
     conn.close()
 
 def iniciar():
@@ -31,9 +36,19 @@ def iniciar():
         print("==================================")
         print("1. ➕ Agregar Pieza")
         print("2. 📋 Catálogo Completo")
+        print("6. 📊 Cargar desde Excel")
         print("3. 🚪 Salir")
         
-        op = input("Opción: ")
-        if op == "1": agregar_pieza()
-        elif op == "3": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            agregar_pieza()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("carro")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
