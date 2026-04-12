@@ -47,6 +47,10 @@ def iniciar():
         print("1. ➕ Agregar")
         print("2. 📋 Ver Catálogo")
         print("3. 🚪 Salir")
+        elif op == "6":
+    from excel_manager import menu_importar
+    menu_importar("tienda")
+
         
         op = input("Opción: ")
         if op == "1": ingresar_producto()
