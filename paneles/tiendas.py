@@ -23,11 +23,12 @@ def ingresar_producto():
     try:
         cursor.execute('''
             INSERT INTO productos_tienda (codigo, nombre, talla, color, precio, stock)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?,?,?,?,?,?)
         ''', (codigo, nombre, talla, color, precio, stock))
         conn.commit()
         print(f"✅ Guardado! Precio: {formato_precio(precio)}")
-    except Exception as e: print(f"❌ {e}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
     conn.close()
 
 def ver_productos():
@@ -44,16 +45,23 @@ def iniciar():
         print("\n==================================")
         print("       SISTEMA DE TIENDA         ")
         print("==================================")
-        print("1. ➕ Agregar")
+        print("1. ➕ Agregar Producto")
         print("2. 📋 Ver Catálogo")
+        print("6. 📊 Cargar desde Excel")
         print("3. 🚪 Salir")
-        elif op == "6":
-    from excel_manager import menu_importar
-    menu_importar("tienda")
-
         
-        op = input("Opción: ")
-        if op == "1": ingresar_producto()
-        elif op == "2": ver_productos()
-        elif op == "3": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            ingresar_producto()
+        elif op == "2":
+            ver_productos()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("tienda")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
