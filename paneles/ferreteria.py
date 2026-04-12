@@ -19,10 +19,15 @@ def agregar_material():
 
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO ferreteria (codigo, nombre, unidad, precio, stock) VALUES (?,?,?,?,?)",
-                   (cod, nom, uni, prec, stk))
-    conn.commit()
-    print(f"✅ Agregado! {formato_precio(prec)}")
+    try:
+        cursor.execute('''
+            INSERT INTO ferreteria (codigo, nombre, unidad, precio, stock)
+            VALUES (?,?,?,?,?)
+        ''', (cod, nom, uni, prec, stk))
+        conn.commit()
+        print(f"✅ Agregado! Precio: {formato_precio(prec)}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
     conn.close()
 
 def ver_listado():
@@ -41,11 +46,21 @@ def iniciar():
         print("==================================")
         print("1. ➕ Agregar Material")
         print("2. 📋 Ver Inventario")
-        print("3. 🧾 Cotización")
-        print("4. 🚪 Salir")
+        print("6. 📊 Cargar desde Excel")
+        print("3. 🚪 Salir")
         
-        op = input("Opción: ")
-        if op == "1": agregar_material()
-        elif op == "2": ver_listado()
-        elif op == "4": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            agregar_material()
+        elif op == "2":
+            ver_listado()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("ferreteria")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
