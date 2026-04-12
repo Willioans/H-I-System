@@ -18,10 +18,24 @@ def registrar_socio():
 
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO socios (nombre, telefono, plan, pago) VALUES (?,?,?,?)",
-                   (nom, tel, plan, pago))
-    conn.commit()
-    print(f"✅ Registrado! Pago: {formato_precio(pago)}")
+    try:
+        cursor.execute('''
+            INSERT INTO socios (nombre, telefono, plan, pago)
+            VALUES (?,?,?,?)
+        ''', (nom, tel, plan, pago))
+        conn.commit()
+        print(f"✅ Registrado! Pago: {formato_precio(pago)}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    conn.close()
+
+def ver_membresias():
+    print("\n📋 LISTA DE SOCIOS")
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, telefono, plan, pago FROM socios")
+    for s in cursor.fetchall():
+        print(f"{s[0]} | Tel: {s[1]} | Plan: {s[2]} | Pago: {formato_precio(s[3])}")
     conn.close()
 
 def iniciar():
@@ -31,10 +45,21 @@ def iniciar():
         print("==================================")
         print("1. ➕ Registrar Socio")
         print("2. 📋 Ver Membresías")
-        print("3. 🚪 Entrada/Salida")
-        print("4. 🚪 Salir")
+        print("6. 📊 Cargar desde Excel")
+        print("3. 🚪 Salir")
         
-        op = input("Opción: ")
-        if op == "1": registrar_socio()
-        elif op == "4": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            registrar_socio()
+        elif op == "2":
+            ver_membresias()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("gimnasio")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
