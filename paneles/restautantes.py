@@ -1,31 +1,49 @@
 """
-🍽️ PANEL DE RESTAURANTE
+🍽️ RESTAURANTE
 Sistema H&I
-Pedidos y Menú QR
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from base_datos import conectar
+from config import formato_precio
+
+def agregar_plato():
+    print("\n🍔 NUEVO PLATO")
+    nom = input("Nombre del Plato: ")
+    cat = input("Categoría: ")
+    prec = float(input("Precio: "))
+
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO menu (nombre, categoria, precio) VALUES (?,?,?)",
+                   (nom, cat, prec))
+    conn.commit()
+    print(f"✅ Agregado! Precio: {formato_precio(prec)}")
+    conn.close()
+
+def ver_menu():
+    print("\n📋 MENÚ COMPLETO")
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, categoria, precio FROM menu")
+    for p in cursor.fetchall():
+        print(f"{p[0]} ({p[1]}) - {formato_precio(p[2])}")
+    conn.close()
+
 def iniciar():
-    print("==================================")
-    print("     SISTEMA DE RESTAURANTE      ")
-    print("==================================")
-    print("📋 MESAS:")
-    print("1. Ver Estado de Mesas")
-    print("2. Tomar Pedido Manual")
-    print("3. Pedidos por Código QR")
-    print("")
-    print("🍳 COCINA:")
-    print("4. Ver Comandas Pendientes")
-    print("")
-    print("🚪 0. Salir")
-    
-    opcion = input("\nSelecciona una opción: ")
-    
-    if opcion == "1":
-        print("🪑 Estado de mesas: Libre / Ocupada...")
-    elif opcion == "3":
-        print("📱 Generando menú digital QR...")
-    elif opcion == "4":
-        print("🔥 Pedidos listos para cocinar...")
-    else:
-        print("👋 Volviendo al menú...")
- 
+    while True:
+        print("\n==================================")
+        print("     SISTEMA DE RESTAURANTE      ")
+        print("==================================")
+        print("1. ➕ Agregar Plato al Menú")
+        print("2. 📋 Ver Menú")
+        print("3. 📱 Generar QR Mesa")
+        print("4. 🚪 Salir")
+        
+        op = input("Opción: ")
+        if op == "1": agregar_plato()
+        elif op == "2": ver_menu()
+        elif op == "4": break
+        input("\nEnter...")
