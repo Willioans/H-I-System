@@ -5,53 +5,41 @@ Sistema H&I
 
 import sys
 import os
-
-# Agregamos esto para que pueda importar la base de datos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from base_datos import conectar
+from config import formato_precio
 
 def ingresar_mercancia():
     print("\n📝 REGISTRAR NUEVO PRODUCTO")
     print("----------------------------")
     
-    codigo = input("Código del producto: ")
-    nombre = input("Nombre del producto: ")
+    codigo = input("Código: ")
+    nombre = input("Nombre: ")
     cantidad = int(input("Cantidad: "))
-    ubicacion = input("Ubicación (Pasillo/Estante): ")
-    vencimiento = input("Fecha de vencimiento (opcional): ")
+    ubicacion = input("Ubicación: ")
+    vencimiento = input("Vencimiento: ")
+    costo = float(input("Costo: "))
 
-    # Conectar y guardar
     conn = conectar()
     cursor = conn.cursor()
-    
     try:
         cursor.execute('''
-            INSERT INTO productos_bodega (codigo, nombre, cantidad, ubicacion, fecha_vencimiento)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (codigo, nombre, cantidad, ubicacion, vencimiento))
-        
+            INSERT INTO productos_bodega (codigo, nombre, cantidad, ubicacion, fecha_vencimiento, costo)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (codigo, nombre, cantidad, ubicacion, vencimiento, costo))
         conn.commit()
-        print(f"✅ Producto '{nombre}' guardado correctamente!")
+        print(f"✅ Guardado! Costo: {formato_precio(costo)}")
     except Exception as e:
-        print(f"❌ Error: El código ya existe o hubo un problema. Detalle: {e}")
-    
+        print(f"❌ Error: {e}")
     conn.close()
 
 def ver_inventario():
-    print("\n📋 LISTA DE INVENTARIO")
-    print("-----------------------")
-    
+    print("\n📋 INVENTARIO GENERAL")
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM productos_bodega")
-    productos = cursor.fetchall()
-    
-    if not productos:
-        print("⚠️ No hay productos registrados aún.")
-    else:
-        for p in productos:
-            print(f"ID: {p[0]} | Código: {p[1]} | Nombre: {p[2]} | Cant: {p[3]} | Ubic: {p[4]}")
-    
+    cursor.execute("SELECT nombre, cantidad, ubicacion, costo FROM productos_bodega")
+    for p in cursor.fetchall():
+        print(f"{p[0]} | Stock: {p[1]} | Ubic: {p[2]} | Valor: {formato_precio(p[3])}")
     conn.close()
 
 def iniciar():
@@ -62,18 +50,10 @@ def iniciar():
         print("==================================")
         print("1. ➕ Ingresar Mercancía")
         print("2. 📋 Ver Inventario")
-        print("3. 🚪 Salir al Menú Principal")
+        print("3. 🚪 Salir")
         
-        opcion = input("\nSelecciona una opción: ")
-        
-        if opcion == "1":
-            ingresar_mercancia()
-        elif opcion == "2":
-            ver_inventario()
-        elif opcion == "3":
-            print("🔙 Volviendo al menú principal...")
-            break
-        else:
-            print("❌ Opción incorrecta, intenta de nuevo.")
-        
-        input("\nPresiona Enter para continuar...")
+        op = input("Opción: ")
+        if op == "1": ingresar_mercancia()
+        elif op == "2": ver_inventario()
+        elif op == "3": break
+        input("\nEnter...")
