@@ -1,144 +1,139 @@
 """
-🚀 H&I SYSTEM - VERSIÓN TODO EN UNO
-SIN ERRORES - LISTO PARA CORRER
+🌐 H&I SYSTEM - VERSION WEB
+Accede desde el navegador
 """
 
+from flask import Flask, render_template_string, request
 import sqlite3
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime
+
+app = Flask(__name__)
 
 # ==============================================
-# SEGURIDAD Y BASE DE DATOS
+# BASE DE DATOS
 # ==============================================
-
 def conectar():
     return sqlite3.connect('h&i_system.db')
 
 def encriptar(texto):
     return hashlib.sha256(texto.encode()).hexdigest()
 
-def inicializar_db():
+def init_db():
     conn = conectar()
     c = conn.cursor()
-    
-    # TABLAS PRINCIPALES
     c.execute('''CREATE TABLE IF NOT EXISTS usuarios
-                 (id INTEGER PRIMARY KEY, usuario TEXT, password TEXT, nombre TEXT, rol TEXT)''')
+                 (usuario TEXT, password TEXT, nombre TEXT, rol TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS clientes
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, fecha_fin TEXT, estado TEXT)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS productos_bodega
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, cantidad REAL, precio REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS productos_tienda
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, talla TEXT, precio REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS ferreteria
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, cantidad REAL, precio REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS socios
-                 (id INTEGER PRIMARY KEY, nombre TEXT, cedula TEXT, fecha_pago TEXT, monto REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS repuestos_moto
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, marca TEXT, precio REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS repuestos_carro
-                 (id INTEGER PRIMARY KEY, codigo TEXT, nombre TEXT, motor TEXT, precio REAL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS menu
-                 (id INTEGER PRIMARY KEY, plato TEXT, categoria TEXT, precio REAL)''')
-
-    conn.commit()
-    conn.close()
-
-def crear_admin():
-    conn = conectar()
-    c = conn.cursor()
+                 (codigo TEXT, nombre TEXT, estado TEXT)''')
+    
+    # Insertar admin
     try:
-        clave = encriptar("1234")
-        c.execute("INSERT INTO usuarios VALUES (NULL, 'admin', ?, 'Administrador', 'SuperAdmin')", (clave,))
+        c.execute("INSERT INTO usuarios VALUES (?, ?, ?, ?)",
+                 ('admin', encriptar('1234'), 'Administrador', 'SuperAdmin'))
+        c.execute("INSERT INTO clientes VALUES (?, ?, ?)",
+                 ('ADMIN001', 'ADMIN', 'ACTIVO'))
         conn.commit()
-    except: pass
-    conn.close()
-
-def crear_cliente_admin():
-    conn = conectar()
-    c = conn.cursor()
-    try:
-        fecha_fin = (datetime.now() + timedelta(days=365)).strftime("%d/%m/%Y")
-        c.execute("INSERT INTO clientes VALUES (NULL, 'ADMIN001', 'ADMINISTRADOR', ?, 'ACTIVO')", (fecha_fin,))
-        conn.commit()
-    except: pass
+    except:
+        pass
     conn.close()
 
 # ==============================================
-# LOGIN Y LICENCIA
+# PLANTILLA HTML (LA PAGINA WEB)
 # ==============================================
+HTML = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>H&I SYSTEM WEB</title>
+    <style>
+        body { font-family: Arial; background: #1a1a1a; color: white; text-align: center; padding-top: 50px; }
+        .box { background: #333; padding: 30px; margin: auto; width: 300px; border-radius: 10px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: #00aa00; color: white; padding: 10px 20px; border: none; font-size: 16px; }
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .item { background: #444; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
 
-def verificar_licencia(cod):
-    conn = conectar()
-    c = conn.cursor()
-    c.execute("SELECT estado, fecha_fin FROM clientes WHERE codigo=?", (cod,))
-    res = c.fetchone()
-    conn.close()
-    if not res or res[0] != "ACTIVO": return False
-    return True
+    {% if not paso_licencia %}
+        <div class="box">
+            <h1>🔐 LICENCIA</h1>
+            <form method="post">
+                <input type="text" name="codigo" placeholder="Código de Cliente" required>
+                <button type="submit" name="accion" value="licencia">VERIFICAR</button>
+            </form>
+        </div>
 
-def verificar_login(user, pasw):
-    conn = conectar()
-    c = conn.cursor()
-    pasw_enc = encriptar(pasw)
-    c.execute("SELECT nombre, rol FROM usuarios WHERE usuario=? AND password=?", (user, pasw_enc))
-    res = c.fetchone()
-    conn.close()
-    return res
+    {% elif not paso_login %}
+        <div class="box">
+            <h1>👤 INICIAR SESIÓN</h1>
+            <form method="post">
+                <input type="text" name="usuario" placeholder="Usuario" required>
+                <input type="password" name="clave" placeholder="Contraseña" required>
+                <button type="submit" name="accion" value="login">ENTRAR</button>
+            </form>
+        </div>
+
+    {% else %}
+        <h1>✅ BIENVENIDO AL SISTEMA H&I</h1>
+        <div class="box menu">
+            <div class="item">📦 BODEGA</div>
+            <div class="item">👕 TIENDA</div>
+            <div class="item">🔩 FERRETERIA</div>
+            <div class="item">💪 GIMNASIO</div>
+            <div class="item">🏍️ MOTO</div>
+            <div class="item">🚗 CARRO</div>
+            <div class="item">🍽️ RESTAURANTE</div>
+            <div class="item">👑 ADMIN</div>
+        </div>
+    {% endif %}
+
+</body>
+</html>
+"""
 
 # ==============================================
-# MENU PRINCIPAL
+# RUTAS
 # ==============================================
-
-def menu():
-    print("\n" + "="*40)
-    print("        H&I SYSTEM - MASTER        ")
-    print("="*40)
-    print("📦 [1] BODEGA        👕 [2] TIENDA")
-    print("🔩 [3] FERRETERIA    💪 [4] GIMNASIO")
-    print("🏍️ [5] MOTO          🚗 [6] CARRO")
-    print("🍽️  [7] RESTAURANTE   👑 [9] ADMIN")
-    print("🚪 [0] SALIR")
-    print("-"*40)
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    paso_licencia = False
+    paso_login = False
+    
+    if request.method == 'POST':
+        accion = request.form.get('accion')
+        
+        if accion == 'licencia':
+            cod = request.form.get('codigo')
+            conn = conectar()
+            c = conn.cursor()
+            c.execute("SELECT * FROM clientes WHERE codigo=? AND estado='ACTIVO'", (cod,))
+            if c.fetchone():
+                paso_licencia = True
+            conn.close()
+            return render_template_string(HTML, paso_licencia=paso_licencia, paso_login=False)
+        
+        elif accion == 'login':
+            user = request.form.get('usuario')
+            pasw = encriptar(request.form.get('clave'))
+            conn = conectar()
+            c = conn.cursor()
+            c.execute("SELECT * FROM usuarios WHERE usuario=? AND password=?", (user, pasw))
+            if c.fetchone():
+                paso_licencia = True
+                paso_login = True
+            conn.close()
+            return render_template_string(HTML, paso_licencia=paso_licencia, paso_login=paso_login)
+    
+    return render_template_string(HTML, paso_licencia=False, paso_login=False)
 
 # ==============================================
-# EJECUCION
+# EJECUTAR
 # ==============================================
-
-def main():
-    print("🚀 INICIANDO SISTEMA...")
-    inicializar_db()
-    crear_admin()
-    crear_cliente_admin()
-
-    # LICENCIA
-    print("\n🔑 VERIFICACION DE LICENCIA")
-    cod = input("Codigo Cliente: ")
-    if not verificar_licencia(cod):
-        print("❌ ACCESO DENEGADO")
-        return
-
-    # LOGIN
-    print("\n🔐 INICIO DE SESION")
-    user = input("Usuario: ")
-    pasw = input("Contraseña: ")
-    datos = verificar_login(user, pasw)
-    if not datos:
-        print("❌ USUARIO O CLAVE INCORRECTOS")
-        return
-
-    print(f"\n✅ BIENVENIDO {datos[0]}!")
-
-    # BUCLE PRINCIPAL
-    while True:
-        menu()
-        op = input("OPCION: ")
-        if op == "0":
-            print("👋 HASTA LUEGO!")
-            break
-        else:
-            print(f"✅ MODULO {op} CARGADO (FUNCIONANDO)")
-            input("Presiona Enter...")
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    init_db()
+    print("🌐 SERVIDOR INICIADO...")
+    print("👉 Abre tu navegador y ve a: http://127.0.0.1:5000")
+    app.run(debug=True)
