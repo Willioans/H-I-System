@@ -1,6 +1,7 @@
 """
 🗄️ MÓDULO DE BASE DE DATOS
 H&I System
+Base de Datos Completa
 """
 
 import sqlite3
@@ -133,15 +134,17 @@ def inicializar_db():
     ''')
 
     # ==================================
-    # 💳 TABLA DE SUSCRIPCIONES Y PAGOS
+    # 🧾 TABLA DE CLIENTES Y LICENCIAS
     # ==================================
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS suscripciones (
+        CREATE TABLE IF NOT EXISTS clientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cliente TEXT,
-            modulo TEXT,
-            fecha_inicio TEXT,
-            fecha_fin TEXT,
+            codigo_cliente TEXT UNIQUE,
+            nombre_empresa TEXT,
+            pais TEXT,
+            modulos_permitidos TEXT,
+            fecha_activacion TEXT,
+            fecha_vencimiento TEXT,
             estado TEXT
         )
     ''')
@@ -161,4 +164,4 @@ def inicializar_db():
 
     conexion.commit()
     conexion.close()
-    print("✅ Base de Datos Actualizada y Lista.")
+    print("✅ Base de Datos Completa y Lista.")
