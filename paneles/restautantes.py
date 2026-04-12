@@ -17,10 +17,15 @@ def agregar_plato():
 
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO menu (nombre, categoria, precio) VALUES (?,?,?)",
-                   (nom, cat, prec))
-    conn.commit()
-    print(f"✅ Agregado! Precio: {formato_precio(prec)}")
+    try:
+        cursor.execute('''
+            INSERT INTO menu (nombre, categoria, precio)
+            VALUES (?,?,?)
+        ''', (nom, cat, prec))
+        conn.commit()
+        print(f"✅ Agregado! Precio: {formato_precio(prec)}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
     conn.close()
 
 def ver_menu():
@@ -39,11 +44,21 @@ def iniciar():
         print("==================================")
         print("1. ➕ Agregar Plato al Menú")
         print("2. 📋 Ver Menú")
-        print("3. 📱 Generar QR Mesa")
-        print("4. 🚪 Salir")
+        print("6. 📊 Cargar desde Excel")
+        print("3. 🚪 Salir")
         
-        op = input("Opción: ")
-        if op == "1": agregar_plato()
-        elif op == "2": ver_menu()
-        elif op == "4": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            agregar_plato()
+        elif op == "2":
+            ver_menu()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("restaurante")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
