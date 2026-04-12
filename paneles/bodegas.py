@@ -25,7 +25,7 @@ def ingresar_mercancia():
     try:
         cursor.execute('''
             INSERT INTO productos_bodega (codigo, nombre, cantidad, ubicacion, fecha_vencimiento, costo)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?,?,?,?,?,?)
         ''', (codigo, nombre, cantidad, ubicacion, vencimiento, costo))
         conn.commit()
         print(f"✅ Guardado! Costo: {formato_precio(costo)}")
@@ -50,10 +50,21 @@ def iniciar():
         print("==================================")
         print("1. ➕ Ingresar Mercancía")
         print("2. 📋 Ver Inventario")
+        print("6. 📊 Cargar desde Excel")
         print("3. 🚪 Salir")
         
-        op = input("Opción: ")
-        if op == "1": ingresar_mercancia()
-        elif op == "2": ver_inventario()
-        elif op == "3": break
-        input("\nEnter...")
+        op = input("\nOpción: ")
+        
+        if op == "1":
+            ingresar_mercancia()
+        elif op == "2":
+            ver_inventario()
+        elif op == "6":
+            from excel_manager import menu_importar
+            menu_importar("bodega")
+        elif op == "3":
+            break
+        else:
+            print("❌ Opción no válida")
+            
+        input("\nPresiona Enter para continuar...")
