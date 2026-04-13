@@ -63,14 +63,12 @@
 </head>
 <body>
 
-    <!-- PANTALLA LICENCIA -->
     <div id="pantalla-licencia" class="screen active">
         <h1 class="titulo">🔐 VERIFICAR LICENCIA</h1>
-        <input type="text" id="codigo" placeholder="Ingrese Código de Cliente">
+        <input type="text" id="codigo" placeholder="Código de Cliente">
         <button onclick="verificarLicencia()">CONTINUAR</button>
     </div>
 
-    <!-- PANTALLA LOGIN -->
     <div id="pantalla-login" class="screen">
         <h1 class="titulo">👤 INICIAR SESIÓN</h1>
         <input type="text" id="usuario" placeholder="Usuario">
@@ -78,7 +76,6 @@
         <button onclick="verificarLogin()">ENTRAR</button>
     </div>
 
-    <!-- MENU PRINCIPAL -->
     <div id="pantalla-menu" class="screen">
         <h1 class="titulo">🚀 H&I SYSTEM</h1>
         <div class="menu-grid">
@@ -94,7 +91,6 @@
     </div>
 
 <script>
-// LÓGICA DEL SISTEMA (TypeScript compilado)
 const usuarios = [
     { usuario: "admin", password: "1234", nombre: "Administrador", rol: "SuperAdmin" }
 ];
@@ -111,28 +107,16 @@ function mostrarPantalla(id) {
 function verificarLicencia() {
     const cod = document.getElementById('codigo').value.trim().toUpperCase();
     const valido = clientes.some(c => c.codigo === cod && c.estado === "ACTIVO");
-    
-    if (valido) {
-        mostrarPantalla('pantalla-login');
-    } else {
-        alert('❌ CÓDIGO INVÁLIDO O INACTIVO');
-    }
+    valido ? mostrarPantalla('pantalla-login') : alert('❌ CÓDIGO INVÁLIDO');
 }
 
 function verificarLogin() {
     const user = document.getElementById('usuario').value.trim();
     const pass = document.getElementById('clave').value.trim();
-    
     const valido = usuarios.some(u => u.usuario === user && u.password === pass);
-    
-    if (valido) {
-        mostrarPantalla('pantalla-menu');
-    } else {
-        alert('❌ USUARIO O CONTRASEÑA INCORRECTOS');
-    }
+    valido ? mostrarPantalla('pantalla-menu') : alert('❌ DATOS INCORRECTOS');
 }
 </script>
 
 </body>
 </html>
- 
